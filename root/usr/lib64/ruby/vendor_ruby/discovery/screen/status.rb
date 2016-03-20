@@ -32,95 +32,97 @@ def screen_status status = generate_info, active_button = 0
   t_status = Newt::Textbox.new(-1, -1, 70, 16, Newt::FLAG_SCROLL)
   t_status.set_text(status)
 
-	if cmdline('fdi.autoreboot')
+	
+  # Added to allow for autoreboot on success of BOOTIF PXE mode
+  if cmdline('fdi.autoreboot')
 
-  		if File.exist?(f = '/tmp/discovery-http-success')
+	  if File.exist?(f = '/tmp/discovery-http-success')
 
-			secs = cmdline("fdi.countdown", 10).to_i rescue 10
+		  secs = cmdline("fdi.countdown", 10).to_i rescue 10
 
-			l_press = Newt::Label.new(-1, -1, "< Reboot (#{secs}) >")
+		  l_press = Newt::Label.new(-1, -1, "< Reboot (#{secs}) >")
 
-			main_grid = Newt::Grid.new(1, 2)
-			but_grid = Newt::Grid.new(1, 1)
+		  main_grid = Newt::Grid.new(1, 2)
+		  but_grid = Newt::Grid.new(1, 1)
 
-			but_grid.set_field(0, 0, Newt::GRID_COMPONENT, l_press, 0, 0, 0, 0, 0, 0)
+		  but_grid.set_field(0, 0, Newt::GRID_COMPONENT, l_press, 0, 0, 0, 0, 0, 0)
 
-			main_grid.set_field(0, 0, Newt::GRID_COMPONENT, t_status, 0, 0, 0, 1, 0, 0)
-			main_grid.set_field(0, 1, Newt::GRID_SUBGRID, but_grid, 0, 0, 0, 0, 0, Newt::GRID_FLAG_GROWX)
-			main_grid.wrapped_window("Discovery status")
+		  main_grid.set_field(0, 0, Newt::GRID_COMPONENT, t_status, 0, 0, 0, 1, 0, 0)
+		  main_grid.set_field(0, 1, Newt::GRID_SUBGRID, but_grid, 0, 0, 0, 0, 0, Newt::GRID_FLAG_GROWX)
+		  main_grid.wrapped_window("Discovery status")
 
-			f = Newt::Form.new
-			f.add(t_status, l_press)
-			f.draw
+		  f = Newt::Form.new
+		  f.add(t_status, l_press)
+		  f.draw
 
-			sec = secs
-			while sec > 0
-				l_press.set_text("< Reboot in (#{sec}s) >")
-				sec = sec - 1
-				Newt::Screen.refresh
-				sleep 1
-			end
-			command("shutdown -r now Reboot from TUI")
+		  sec = secs
+		  while sec > 0
+			  l_press.set_text("< Reboot in (#{sec}s) >")
+			  sec = sec - 1
+			  Newt::Screen.refresh
+			  sleep 1
+		  end
+		  command("shutdown -r now Reboot from TUI")
 
-		else
+	  else
 
-			sleep 10
-			if cmdline('BOOTIF')
-				command("rm -f /tmp/discovery-http*")
-				# discovery register will be restarted in countdown screen
-				[:screen_countdown, true]
-			else
-				Newt::Screen.win_message("Not supported", "OK", "Resending not possible in PXE-less, reboot and start over.")
-				command("shutdown -r now Reboot from TUI")
-			end
+		  sleep 10
+		  if cmdline('BOOTIF')
+			  command("rm -f /tmp/discovery-http*")
+			  # discovery register will be restarted in countdown screen
+			  [:screen_countdown, true]
+		  else
+			  Newt::Screen.win_message("Not supported", "OK", "Resending not possible in PXE-less, reboot and start over.")
+			  command("shutdown -r now Reboot from TUI")
+		  end
 
-		end
+	  end
 
-	else
+  else
 
-		buttons = []
-		buttons[0] = b_resend = Newt::CompactButton.new(-1, -1, "Resend")
-		buttons[1] = b_status = Newt::CompactButton.new(-1, -1, "Status")
-		buttons[2] = b_facts = Newt::CompactButton.new(-1, -1, "Facts")
-		buttons[3] = b_syslog = Newt::CompactButton.new(-1, -1, "Logs")
-		buttons[4] = b_ssh = Newt::CompactButton.new(-1, -1, "SSH")
-		buttons[5] = b_reboot = Newt::CompactButton.new(-1, -1, "Reboot")
+	  buttons = []
+	  buttons[0] = b_resend = Newt::CompactButton.new(-1, -1, "Resend")
+	  buttons[1] = b_status = Newt::CompactButton.new(-1, -1, "Status")
+	  buttons[2] = b_facts = Newt::CompactButton.new(-1, -1, "Facts")
+	  buttons[3] = b_syslog = Newt::CompactButton.new(-1, -1, "Logs")
+	  buttons[4] = b_ssh = Newt::CompactButton.new(-1, -1, "SSH")
+	  buttons[5] = b_reboot = Newt::CompactButton.new(-1, -1, "Reboot")
 
-		main_grid = Newt::Grid.new(1, 2)
-		but_grid = Newt::Grid.new(6, 1)
+	  main_grid = Newt::Grid.new(1, 2)
+	  but_grid = Newt::Grid.new(6, 1)
 
-		buttons.each_with_index do |btn, i|
-			but_grid.set_field(i, 0, Newt::GRID_COMPONENT, btn, 0, 0, 0, 0, 0, 0)
-		end
+	  buttons.each_with_index do |btn, i|
+		  but_grid.set_field(i, 0, Newt::GRID_COMPONENT, btn, 0, 0, 0, 0, 0, 0)
+	  end
 
-		main_grid.set_field(0, 0, Newt::GRID_COMPONENT, t_status, 0, 0, 0, 0, 0, 0)
-		main_grid.set_field(0, 1, Newt::GRID_SUBGRID, but_grid, 0, 1, 0, 0, 0, Newt::GRID_FLAG_GROWX)
-		main_grid.wrapped_window("Discovery status")
+	  main_grid.set_field(0, 0, Newt::GRID_COMPONENT, t_status, 0, 0, 0, 0, 0, 0)
+	  main_grid.set_field(0, 1, Newt::GRID_SUBGRID, but_grid, 0, 1, 0, 0, 0, Newt::GRID_FLAG_GROWX)
+	  main_grid.wrapped_window("Discovery status")
 
-		f = Newt::Form.new
-		f.add(t_status, b_resend, b_status, b_facts, b_syslog, b_ssh, b_reboot)
-		answer = f.run()
-		if answer == b_status
-			:screen_status
-		elsif answer == b_facts
-			[:screen_status, command("facter")]
-		elsif answer == b_syslog
-			[:screen_status, command("discovery-debug")]
-		elsif answer == b_reboot
-			[:screen_status, command("shutdown -r now Reboot from TUI")]
-		elsif answer == b_ssh
-			:screen_ssh
-		elsif answer == b_resend
-			if cmdline('BOOTIF')
-				command("rm -f /tmp/discovery-http*")
-				# discovery register will be restarted in countdown screen
-				[:screen_countdown, true]
-			else
-				Newt::Screen.win_message("Not supported", "OK", "Resending not possible in PXE-less, reboot and start over.")
-				:screen_status
-			end
-		else
-			:quit
-		end
-	end
+	  f = Newt::Form.new
+	  f.add(t_status, b_resend, b_status, b_facts, b_syslog, b_ssh, b_reboot)
+	  answer = f.run()
+	  if answer == b_status
+		  :screen_status
+	  elsif answer == b_facts
+		  [:screen_status, command("facter")]
+	  elsif answer == b_syslog
+		  [:screen_status, command("discovery-debug")]
+	  elsif answer == b_reboot
+		  [:screen_status, command("shutdown -r now Reboot from TUI")]
+	  elsif answer == b_ssh
+		  :screen_ssh
+	  elsif answer == b_resend
+		  if cmdline('BOOTIF')
+			  command("rm -f /tmp/discovery-http*")
+			  # discovery register will be restarted in countdown screen
+			  [:screen_countdown, true]
+		  else
+			  Newt::Screen.win_message("Not supported", "OK", "Resending not possible in PXE-less, reboot and start over.")
+			  :screen_status
+		  end
+	  else
+		  :quit
+	  end
+  end
 end
