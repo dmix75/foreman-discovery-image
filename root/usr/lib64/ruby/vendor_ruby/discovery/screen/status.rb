@@ -34,7 +34,7 @@ def screen_status status = generate_info, active_button = 0
 
 	if cmdline('fdi.autoreboot')
 
-  	if File.exist?(f = '/tmp/discovery-http-success')
+  		if File.exist?(f = '/tmp/discovery-http-success')
 
 			secs = cmdline("fdi.countdown", 10).to_i rescue 10
 
